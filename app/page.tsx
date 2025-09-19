@@ -142,9 +142,7 @@ const Chat = () => {
 	return (
 		<main className="flex min-h-screen flex-col p-24">
 			<div className="flex flex-col w-full max-w-xl mx-auto stretch">
-				<h1 className="text-3xl text-zinc-100 font-extrabold pb-4">
-					ARMAP - Assurance & Resilience Mapping
-				</h1>
+				<h1 className="text-3xl text-zinc-100 font-extrabold pb-4">ARMAP - Assurance & Resilience Mapping</h1>
 				{error != null && (
 					<div className="relative bg-red-500 text-white px-6 py-4 rounded-md">
 						<span className="block sm:inline">
