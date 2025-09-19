@@ -9,7 +9,8 @@ import { zfd } from "zod-form-data";
 const schema = zfd.formData({
 	threadId: z.string().or(z.undefined()),
 	message: zfd.text(),
-	file: z.instanceof(Blob)
+	file: z.instanceof(Blob).optional(),
+	assistantId: zfd.text().optional()
 });
 
 // Create an OpenAI API client (that's edge friendly!)
@@ -24,15 +25,14 @@ export async function POST(req: NextRequest) {
 
 	const data = schema.parse(input);
 
-	const file = new File([data.file], "file", { type: data.file.type });
-
 	const threadId = Boolean(data.threadId)
 		? data.threadId!
 		: (await openai.beta.threads.create()).id;
 
 	let openAiFile: OpenAI.Files.FileObject | null = null;
 
-	if (data.file.size > 0) {
+	if (data.file && data.file.size > 0) {
+		const file = new File([data.file], "file", { type: data.file.type });
 		openAiFile = await openai.files.create({
 			file,
 			purpose: "assistants"
@@ -54,13 +54,16 @@ export async function POST(req: NextRequest) {
 	return experimental_AssistantResponse(
 		{ threadId, messageId: createdMessage.id },
 		async ({ threadId, sendMessage }) => {
+			// Use provided assistantId or fall back to environment variable
+			const assistantId = data.assistantId || env.OPENAI_ASSISTANT_ID;
+			
+			if (!assistantId) {
+				throw new Error("ASSISTANT_ID is not set and no assistantId provided");
+			}
+
 			// Run the assistant on the thread
 			const run = await openai.beta.threads.runs.create(threadId, {
-				assistant_id:
-					env.OPENAI_ASSISTANT_ID ??
-					(() => {
-						throw new Error("ASSISTANT_ID is not set");
-					})()
+				assistant_id: assistantId
 			});
 
 			async function waitForRun(run: OpenAI.Beta.Threads.Runs.Run) {
