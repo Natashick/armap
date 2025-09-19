@@ -2,218 +2,268 @@
 
 import { Button } from "@/components/button";
 import { Icons } from "@/components/icons";
-import { Input } from "@/components/input";
 import { readDataStream } from "@/lib/read-data-stream";
 import { AssistantStatus, Message } from "ai/react";
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 
-const roleToColorMap: Record<Message["role"], string> = {
-	system: "lightred",
-	user: "white",
-	function: "lightblue",
-	assistant: "lightgreen"
-};
+const ASSISTANT_NAME = "ARMAP - Assurance & Resilience Mapping";
 
 const DotAnimation = () => {
-	const dotVariants = {
-		initial: { opacity: 0 },
-		animate: { opacity: 1, transition: { duration: 0.5 } },
-		exit: { opacity: 0, transition: { duration: 0.5 } }
-	};
+  const dotVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.5 } },
+    exit: { opacity: 0, transition: { duration: 0.5 } }
+  };
 
-	// Stagger children animations
-	const containerVariants = {
-		initial: { transition: { staggerChildren: 0 } },
-		animate: { transition: { staggerChildren: 0.5, staggerDirection: 1 } },
-		exit: { transition: { staggerChildren: 0.5, staggerDirection: 1 } }
-	};
+  const containerVariants = {
+    initial: { transition: { staggerChildren: 0 } },
+    animate: { transition: { staggerChildren: 0.5, staggerDirection: 1 } },
+    exit: { transition: { staggerChildren: 0.5, staggerDirection: 1 } }
+  };
 
-	const [key, setKey] = useState(0);
+  const [key, setKey] = useState(0);
 
-	// ...
-	return (
-		<motion.div
-			key={key}
-			initial="initial"
-			animate="animate"
-			exit="exit"
-			className="flex gap-x-0.5 -ml-1"
-			variants={containerVariants}
-			onAnimationComplete={() => setKey((prevKey) => prevKey + 1)}
-		>
-			{[...Array(3)].map((_, i) => (
-				<motion.span key={i} variants={dotVariants}>
-					.
-				</motion.span>
-			))}
-		</motion.div>
-	);
+  return (
+    <motion.div
+      key={key}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="flex gap-x-0.5 -ml-1"
+      variants={containerVariants}
+      onAnimationComplete={() => setKey((prevKey) => prevKey + 1)}
+    >
+      {[...Array(3)].map((_, i) => (
+        <motion.span key={i} variants={dotVariants}>
+          .
+        </motion.span>
+      ))}
+    </motion.div>
+  );
 };
 
 const Chat = () => {
-	const prompt = "Summarise the research paper...";
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [message, setMessage] = useState<string>(prompt);
-	const [file, setFile] = useState<File | undefined>(undefined);
-	const [threadId, setThreadId] = useState<string>("");
-	const [error, setError] = useState<unknown | undefined>(undefined);
-	const [status, setStatus] = useState<AssistantStatus>("awaiting_message");
-	const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const placeholder = "Schreibe deine Nachricht…";
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const [threadId, setThreadId] = useState<string>("");
+  const [error, setError] = useState<unknown | undefined>(undefined);
+  const [status, setStatus] = useState<AssistantStatus>("awaiting_message");
 
-	const handleFormSubmit = async (e: FormEvent) => {
-		e.preventDefault();
+  // Auto-Scroll ans Ende
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
 
-		setStatus("in_progress");
+  const handleFormSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (status !== "awaiting_message") return;
+    if (!message.trim()) return;
 
-		setMessages((messages: Message[]) => [
-			...messages,
-			{ id: "", role: "user" as "user", content: message! }
-		]);
+    setStatus("in_progress");
 
-		const formData = new FormData();
-		formData.append("message", message as string);
-		formData.append("threadId", threadId);
-		formData.append("file", file as File);
+    // Nutzer-Nachricht sofort anzeigen
+    setMessages((msgs: Message[]) => [
+      ...msgs,
+      { id: "", role: "user", content: message.trim() }
+    ]);
 
-		const result = await fetch("/api/assistant", {
-			method: "POST",
-			body: formData
-		});
+    const formData = new FormData();
+    formData.append("message", message.trim());
+    formData.append("threadId", threadId);
 
-		setFile(undefined);
+    // Eingabefeld leeren
+    setMessage("");
 
-		if (result.body == null) {
-			throw new Error("The response body is empty.");
-		}
+    const result = await fetch("/api/assistant", {
+      method: "POST",
+      body: formData
+    });
 
-		try {
-			for await (const { type, value } of readDataStream(
-				result.body.getReader()
-			)) {
-				switch (type) {
-					case "assistant_message": {
-						setMessages((messages: Message[]) => [
-							...messages,
-							{
-								id: value.id,
-								role: value.role,
-								content: value.content[0].text.value
-							}
-						]);
-						break;
-					}
-					case "assistant_control_data": {
-						setThreadId(value.threadId);
-						setMessages((messages: Message[]) => {
-							const lastMessage = messages[messages.length - 1];
-							lastMessage.id = value.messageId;
-							return [...messages.slice(0, messages.length - 1), lastMessage];
-						});
-						break;
-					}
-					case "error": {
-						setError(value);
-						break;
-					}
-				}
-			}
-		} catch (error) {
-			setError(error);
-		}
+    if (result.body == null) {
+      setStatus("awaiting_message");
+      throw new Error("The response body is empty.");
+    }
 
-		setStatus("awaiting_message");
-	};
+    try {
+      for await (const { type, value } of readDataStream(
+        result.body.getReader()
+      )) {
+        switch (type) {
+          case "assistant_message": {
+            setMessages((msgs: Message[]) => [
+              ...msgs,
+              {
+                id: value.id,
+                role: value.role,
+                content: value.content[0].text.value
+              }
+            ]);
+            break;
+          }
+          case "assistant_control_data": {
+            setThreadId(value.threadId);
+            // letzte User-Nachricht per Kopie mit ID versehen
+            setMessages((msgs: Message[]) => {
+              if (msgs.length === 0) return msgs;
+              const updated = [...msgs];
+              const lastIdx = updated.length - 1;
+              updated[lastIdx] = { ...updated[lastIdx], id: value.messageId };
+              return updated;
+            });
+            break;
+          }
+          case "error": {
+            setError(value);
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      setError(error);
+    }
 
-	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		setFile(file);
-	};
+    setStatus("awaiting_message");
+  };
 
-	const handleMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
-		setMessage(e.target.value);
-	};
+  const handleMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+  };
 
-	const handleOpenFileExplorer = () => {
-		fileInputRef.current?.click();
-	};
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (status === "awaiting_message" && message.trim()) {
+        // submit auslösen
+        const form = (e.currentTarget as HTMLTextAreaElement).closest("form");
+        form?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+      }
+    }
+  };
 
-	return (
-		<main className="flex min-h-screen flex-col p-24">
-			<div className="flex flex-col w-full max-w-xl mx-auto stretch">
-				<h1 className="text-3xl text-zinc-100 font-extrabold pb-4">ARMAP - Assurance & Resilience Mapping</h1>
-				{error != null && (
-					<div className="relative bg-red-500 text-white px-6 py-4 rounded-md">
-						<span className="block sm:inline">
-							Error: {(error as any).toString()}
-						</span>
-					</div>
-				)}
+  return (
+    <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950">
+      <div className="flex flex-col w-full max-w-3xl mx-auto px-6 md:px-12 pt-8 pb-32">
+        {/* Header mit Avatar */}
+        <header className="flex items-center gap-4 mb-6">
+          <img
+            src="/armap-avatar.png"
+            alt="ARMAP Avatar"
+            className="w-12 h-12 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
+          />
+          <div>
+            <h1 className="text-3xl md:text-4xl text-zinc-100 font-extrabold leading-tight">
+              {ASSISTANT_NAME}
+            </h1>
+            <p className="text-sm text-zinc-400">Dein Assurance & Resilience Mapping Assistant</p>
+          </div>
+        </header>
 
-				{messages.map((m: Message) => (
-					<div
-						key={m.id}
-						className="whitespace-pre-wrap"
-						style={{ color: roleToColorMap[m.role] }}
-					>
-						<strong>{`${m.role}: `}</strong>
-						<ReactMarkdown>{m.content}</ReactMarkdown>
-						<br />
-						<br />
-					</div>
-				))}
+        {error != null && (
+          <div className="relative bg-red-500 text-white px-6 py-4 rounded-md mb-4">
+            <span className="block sm:inline">Error: {(error as any).toString()}</span>
+          </div>
+        )}
 
-				{status === "in_progress" && (
-					<span className="text-white flex gap-x-2">
-						<Icons.spinner className="animate-spin w-5 h-5" />
-						Reading
-						<DotAnimation />
-					</span>
-				)}
+        {/* Nachrichtenbereich */}
+        <div className="flex flex-col w-full gap-3">
+          {messages.map((m: Message, idx) => {
+            const isUser = m.role === "user";
+            return (
+              <div
+                key={(m.id || "msg") + "-" + idx}
+                className={`w-full flex ${isUser ? "justify-end" : "justify-start"}`}
+              >
+                <div className={`flex items-start gap-3 max-w-[85%]`}>
+                  {/* Avatar */}
+                  {!isUser ? (
+                    <img
+                      src="/armap-avatar.png"
+                      alt="ARMAP Avatar"
+                      className="w-8 h-8 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
+                      Du
+                    </div>
+                  )}
 
-				<form
-					onSubmit={handleFormSubmit}
-					className="flex items-start flex-col p-4 pb-2 text-white max-w-xl bg-black mx-auto fixed bottom-0 w-full mb-8 border border-gray-300 rounded-xl shadow-xl"
-				>
-					<div className="flex items-start w-full">
-						<Input
-							disabled={status !== "awaiting_message"}
-							className="flex-1 placeholder:text-white bg-neutral-900"
-							placeholder={prompt}
-							onChange={handleMessageChange}
-						/>
-						<Button
-							className="flex-0 ml-2 cursor-pointer"
-							variant="ghost"
-							type="submit"
-							disabled={status !== "awaiting_message"}
-						>
-							<Icons.arrowRight className="text-gray-200 hover:text-white transition-colors duration-200 ease-in-out" />
-						</Button>
-					</div>
+                  {/* Bubble */}
+                  <div
+                    className={`rounded-2xl px-4 py-3 shadow border ${
+                      isUser
+                        ? "bg-blue-600 text-white border-blue-500"
+                        : "bg-neutral-900 text-zinc-100 border-neutral-800"
+                    }`}
+                  >
+                    <ReactMarkdown className="whitespace-pre-wrap">
+                      {m.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
 
-					<Button
-						type="button"
-						disabled={status !== "awaiting_message"}
-						onClick={handleOpenFileExplorer}
-						className="flex gap-x-1 group cursor-pointer text-gray-200 px-1 pb-0"
-					>
-						<input
-							type="file"
-							ref={fileInputRef}
-							onChange={handleFileChange}
-							className="sr-only"
-						/>
-						<Icons.paperClip className="group-hover:text-white transition-colors duration-200 ease-in-out w-4 h-4" />
-						<span className="group-hover:text-white transition-colors duration-200 ease-in-out text-xs">
-							{file ? file.name : "Add a file"}
-						</span>
-					</Button>
-				</form>
-			</div>
-		</main>
-	);
+          {status === "in_progress" && (
+            <div className="w-full flex justify-start mt-1">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/armap-avatar.png"
+                  alt="ARMAP Avatar"
+                  className="w-6 h-6 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                />
+                <span className="text-zinc-300 flex items-center gap-2">
+                  <Icons.spinner className="animate-spin w-4 h-4" />
+                  Antwort wird generiert <DotAnimation />
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Spacer für das fixierte Eingabefeld */}
+          <div ref={bottomRef} className="h-40" />
+        </div>
+      </div>
+
+      {/* Eingabebereich – breiter und höher, fixiert */}
+      <form
+        onSubmit={handleFormSubmit}
+        className="flex flex-col gap-2 p-3 text-white bg-black/70 backdrop-blur-sm fixed left-1/2 -translate-x-1/2 bottom-6 w-[92%] max-w-3xl border border-neutral-800 rounded-2xl shadow-xl"
+      >
+        <textarea
+          disabled={status !== "awaiting_message"}
+          value={message}
+          onChange={handleMessageChange}
+          onKeyDown={handleTextareaKeyDown}
+          placeholder={placeholder}
+          rows={5}
+          className={`w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-4 outline-none
+            ${status !== "awaiting_message" ? "opacity-70" : "opacity-100"}
+            focus:ring-2 focus:ring-blue-600 border border-neutral-800`}
+        />
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-zinc-500">
+            Enter senden • Shift+Enter Zeilenumbruch
+          </div>
+          <Button
+            className="flex items-center gap-2 px-4 py-2"
+            variant="ghost"
+            type="submit"
+            disabled={status !== "awaiting_message"}
+            aria-label="Nachricht senden"
+            title="Nachricht senden"
+          >
+            Senden
+            <Icons.arrowRight className="text-gray-200 hover:text-white transition-colors duration-200 ease-in-out w-5 h-5" />
+          </Button>
+        </div>
+      </form>
+    </main>
+  );
 };
 
 export default Chat;
