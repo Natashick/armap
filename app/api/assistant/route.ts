@@ -1,6 +1,5 @@
 import { experimental_AssistantResponse } from "ai";
 import OpenAI from "openai";
-import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
 import { env } from "@/env.mjs";
 import { NextRequest } from "next/server";
 import { z } from "zod";
@@ -18,6 +17,7 @@ const openai = new OpenAI({
 		"OpenAI-Beta": "assistants=v2"
 	}
 });
+
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
 
 				// Check the run status
 				if (
-					run. status === "cancelled" ||
+					run.status === "cancelled" ||
 					run.status === "cancelling" ||
 					run.status === "failed" ||
 					run.status === "expired"
 				) {
-					throw new Error(run. status);
+					throw new Error(run.status);
 				}
 			}
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
 			// Get new thread messages (after our message)
 			const responseMessages = (
-				await openai.beta.threads.messages.list(threadId, {
+				await openai.beta. threads.messages.list(threadId, {
 					after: createdMessage.id,
 					order: "asc"
 				})
@@ -88,9 +88,14 @@ export async function POST(req: NextRequest) {
 				sendMessage({
 					id: message.id,
 					role: "assistant",
-					content: message.content. filter(
-						(content) => content.type === "text"
-					) as Array<MessageContentText>
+					content: message.content
+						.filter((content) => content.type === "text")
+						.map((content) => ({
+							type: "text" as const,
+							text: {
+								value: (content as any).text.value
+							}
+						}))
 				});
 			}
 		}
