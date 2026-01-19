@@ -1,6 +1,6 @@
 import { experimental_AssistantResponse } from "ai";
 import OpenAI from "openai";
-import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
+import { MessageContentText } from "openai/resources/beta/threads/messages";
 import { env } from "@/env.mjs";
 import { NextRequest } from "next/server";
 import { z } from "zod";
