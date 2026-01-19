@@ -9,12 +9,14 @@ import { zfd } from "zod-form-data";
 const schema = zfd.formData({
 	threadId: z.string().or(z.undefined()),
 	message: zfd.text(),
-	file: z.instanceof(Blob).optional()
 });
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
-	apiKey: env.OPENAI_API_KEY || ""
+	apiKey: env.OPENAI_API_KEY || "",
+	defaultHeaders: {
+		"OpenAI-Beta": "assistants=v2"
+	}
 });
 export const runtime = "edge";
 
@@ -27,21 +29,10 @@ export async function POST(req: NextRequest) {
 	const threadId = Boolean(data.threadId)
 		? data.threadId!
 		: (await openai.beta.threads.create()).id;
-
-	let openAiFile: OpenAI.Files.FileObject | null = null;
-
-	if (data.file && data.file.size > 0) {
-		const file = new File([data.file], "file", { type: data.file.type });
-		openAiFile = await openai.files.create({
-			file,
-			purpose: "assistants"
-		});
-	}
-
+	
 	const messageData = {
-		role: "user" as "user",
-		content: data.message,
-		file_ids: openAiFile ? [openAiFile.id] : undefined
+		role: "user" as const,
+		content: data.message
 	};
 
 	// Add a message to the thread
