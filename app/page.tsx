@@ -152,7 +152,7 @@ const Chat = () => {
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-12 h-12 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
           />
           <div>
             <h1 className="text-3xl md:text-4xl text-zinc-100 font-extrabold leading-tight">
@@ -183,10 +183,10 @@ const Chat = () => {
                     <img
                       src="/armap-avatar.png"
                       alt="ARMAP Avatar"
-                      className="w-8 h-8 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                      className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
+                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
                       Du
                     </div>
                   )}
@@ -214,11 +214,11 @@ const Chat = () => {
                 <img
                   src="/armap-avatar.png"
                   alt="ARMAP Avatar"
-                  className="w-6 h-6 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                  className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
                 />
                 <span className="text-zinc-300 flex items-center gap-2">
                   <Icons.spinner className="animate-spin w-4 h-4" />
-                  Antwort wird generiert <DotAnimation />
+                  ARMAP tippt… <DotAnimation />
                 </span>
               </div>
             </div>
