@@ -218,7 +218,7 @@ const Chat = () => {
                 />
                 <span className="text-zinc-300 flex items-center gap-2">
                   <Icons.spinner className="animate-spin w-4 h-4" />
-                  ARMAP tippt… <DotAnimation />
+                  ARMAP tippt <DotAnimation />
                 </span>
               </div>
             </div>
