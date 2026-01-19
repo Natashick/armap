@@ -164,7 +164,7 @@ const Chat = () => {
 
         {error != null && (
           <div className="relative bg-red-500 text-white px-6 py-4 rounded-md mb-4">
-            <span className="block sm: inline">Error: {(error as any).toString()}</span>
+            <span className="block sm:inline">Error: {(error as any).toString()}</span>
           </div>
         )}
 
@@ -177,7 +177,7 @@ const Chat = () => {
                 key={(m.id || "msg") + "-" + idx}
                 className={`w-full flex ${isUser ? "justify-end" : "justify-start"}`}
               >
-                <div className={`flex items-start gap-3 ${isUser ? "max-w-[85%]" : "max-w-[92%]"}`}>
+                <div className={`flex items-start gap-3 ${isUser ? "max-w-[85%]" : "max-w-[98%]"}`}>
                   {/* Avatar */}
                   {!isUser ? (
                     <img
