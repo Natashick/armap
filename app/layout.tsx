@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "ARMAP Assistant",
 		description: "Dein Assurance & Resilience Mapping Assistant",
-		type: "website"
+		type:  "website"
 	}
 };
 
