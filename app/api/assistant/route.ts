@@ -9,7 +9,7 @@ import { zfd } from "zod-form-data";
 const schema = zfd.formData({
 	threadId: z.string().or(z.undefined()),
 	message: zfd.text(),
-	file: z.instanceof(Blob)
+	file: z.instanceof(Blob).optional()
 });
 
 // Create an OpenAI API client (that's edge friendly!)
@@ -24,15 +24,14 @@ export async function POST(req: NextRequest) {
 
 	const data = schema.parse(input);
 
-	const file = new File([data.file], "file", { type: data.file.type });
-
 	const threadId = Boolean(data.threadId)
 		? data.threadId!
 		: (await openai.beta.threads.create()).id;
 
 	let openAiFile: OpenAI.Files.FileObject | null = null;
 
-	if (data.file.size > 0) {
+	if (data.file && data.file.size > 0) {
+		const file = new File([data.file], "file", { type: data.file.type });
 		openAiFile = await openai.files.create({
 			file,
 			purpose: "assistants"
