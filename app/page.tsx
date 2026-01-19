@@ -171,39 +171,41 @@ const Chat = () => {
         {/* Nachrichtenbereich */}
         <div className="flex flex-col w-full gap-3">
           {messages.map((m: Message, idx) => {
-            const isUser = m. role === "user";
+            const isUser = m.role === "user";
             return (
               <div
                 key={(m.id || "msg") + "-" + idx}
-                className={`w-full flex ${isUser ? "justify-end" : "justify-start"}`}
+                className={`w-full flex ${isUser ? "justify-end" :  "justify-start"}`}
               >
-                <div className={`flex items-start gap-3 ${isUser ? "max-w-[85%]" : "max-w-[98%]"}`}>
-                  {/* Avatar */}
-                  {!isUser ? (
+                {! isUser ?  (
+                  // Сообщение от бота - на всю ширину
+                  <div className="flex items-start gap-3 w-full">
                     <img
                       src="/armap-avatar.png"
                       alt="ARMAP Avatar"
                       className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
                     />
-                  ) : (
+                    <div className="flex-1">
+                      <div className="rounded-2xl px-4 py-3 shadow border bg-neutral-900 text-zinc-100 border-neutral-800">
+                        <ReactMarkdown className="whitespace-pre-wrap">
+                          {m.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Сообщение от пользователя - ограничено 85%
+                  <div className="flex items-start gap-3 max-w-[85%]">
                     <div className="w-10 h-10 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
                       Du
                     </div>
-                  )}
-
-                  {/* Bubble */}
-                  <div
-                    className={`rounded-2xl px-4 py-3 shadow border ${
-                      isUser
-                        ? "bg-blue-600 text-white border-blue-500"
-                        : "bg-neutral-900 text-zinc-100 border-neutral-800"
-                    }`}
-                  >
-                    <ReactMarkdown className="whitespace-pre-wrap">
-                      {m.content}
-                    </ReactMarkdown>
+                    <div className="rounded-2xl px-4 py-3 shadow border bg-blue-600 text-white border-blue-500">
+                      <ReactMarkdown className="whitespace-pre-wrap">
+                        {m.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}
