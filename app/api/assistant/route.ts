@@ -8,7 +8,7 @@ import { zfd } from "zod-form-data";
 
 const schema = zfd.formData({
 	threadId: z.string().or(z.undefined()),
-	message: zfd.text(),
+	message: zfd.text()
 });
 
 // Create an OpenAI API client (that's edge friendly!)
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
 	const data = schema.parse(input);
 
 	const threadId = Boolean(data.threadId)
-		? data.threadId!
+		? data.threadId! 
 		: (await openai.beta.threads.create()).id;
-	
+
 	const messageData = {
 		role: "user" as const,
 		content: data.message
@@ -46,14 +46,14 @@ export async function POST(req: NextRequest) {
 		async ({ threadId, sendMessage }) => {
 			// Run the assistant on the thread
 			const run = await openai.beta.threads.runs.create(threadId, {
-				assistant_id:
+				assistant_id: 
 					env.OPENAI_ASSISTANT_ID ??
 					(() => {
 						throw new Error("ASSISTANT_ID is not set");
 					})()
 			});
 
-			async function waitForRun(run: OpenAI.Beta.Threads.Runs.Run) {
+			async function waitForRun(run:  OpenAI.Beta.Threads. Runs.Run) {
 				// Poll for status change
 				while (run.status === "queued" || run.status === "in_progress") {
 					// delay for 500ms
@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
 
 				// Check the run status
 				if (
-					run.status === "cancelled" ||
+					run. status === "cancelled" ||
 					run.status === "cancelling" ||
 					run.status === "failed" ||
 					run.status === "expired"
 				) {
-					throw new Error(run.status);
+					throw new Error(run. status);
 				}
 			}
 
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 				sendMessage({
 					id: message.id,
 					role: "assistant",
-					content: message.content.filter(
+					content: message.content. filter(
 						(content) => content.type === "text"
 					) as Array<MessageContentText>
 				});
