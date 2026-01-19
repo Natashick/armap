@@ -152,7 +152,7 @@ const Chat = () => {
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-22 h-22 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
           />
           <div>
             <h1 className="text-3xl md:text-4xl text-zinc-100 font-extrabold leading-tight">
@@ -164,20 +164,20 @@ const Chat = () => {
 
         {error != null && (
           <div className="relative bg-red-500 text-white px-6 py-4 rounded-md mb-4">
-            <span className="block sm:inline">Error: {(error as any).toString()}</span>
+            <span className="block sm: inline">Error: {(error as any).toString()}</span>
           </div>
         )}
 
         {/* Nachrichtenbereich */}
-        <div className={`flex items-start gap-3 max-w-[92%]`}>
+        <div className="flex flex-col w-full gap-3">
           {messages.map((m: Message, idx) => {
-            const isUser = m.role === "user";
+            const isUser = m. role === "user";
             return (
               <div
                 key={(m.id || "msg") + "-" + idx}
                 className={`w-full flex ${isUser ? "justify-end" : "justify-start"}`}
               >
-                <div className={`flex items-start gap-3 max-w-[85%]`}>
+                <div className={`flex items-start gap-3 ${isUser ? "max-w-[85%]" : "max-w-[92%]"}`}>
                   {/* Avatar */}
                   {!isUser ? (
                     <img
