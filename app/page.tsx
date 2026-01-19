@@ -152,7 +152,7 @@ const Chat = () => {
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
+            className="w-22 h-22 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
           />
           <div>
             <h1 className="text-3xl md:text-4xl text-zinc-100 font-extrabold leading-tight">
@@ -169,7 +169,7 @@ const Chat = () => {
         )}
 
         {/* Nachrichtenbereich */}
-        <div className="flex flex-col w-full gap-3">
+        <div className={`flex items-start gap-3 max-w-[92%]`}>
           {messages.map((m: Message, idx) => {
             const isUser = m.role === "user";
             return (
