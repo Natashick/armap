@@ -10,207 +10,146 @@ import { motion } from "framer-motion";
 
 const ASSISTANT_NAME = "ARMAP - Assurance & Resilience Mapping";
 
-const DotAnimation = () => {
-  const dotVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.5 } },
-    exit: { opacity: 0, transition: { duration: 0.5 } }
-  };
-
-  const containerVariants = {
-    initial: { transition: { staggerChildren: 0 } },
-    animate: { transition: { staggerChildren: 0.5, staggerDirection: 1 } },
-    exit: { transition: { staggerChildren: 0.5, staggerDirection: 1 } }
-  };
-
-  const [key, setKey] = useState(0);
-
-  return (
-    <motion.div
-      key={key}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className="flex gap-x-0.5 -ml-1"
-      variants={containerVariants}
-      onAnimationComplete={() => setKey((prevKey) => prevKey + 1)}
-    >
-      {[...Array(3)].map((_, i) => (
-        <motion.span key={i} variants={dotVariants}>
-          .
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-};
+const DotAnimation = () => (
+  <span className="inline-flex gap-x-1 ml-1">
+    {[0, 1, 2]. map((i) => (
+      <motion.span
+        key={i}
+        initial={{ opacity: 0.3 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse", delay: i * 0.2 }}
+      >
+        . 
+      </motion.span>
+    ))}
+  </span>
+);
 
 const Chat = () => {
   const placeholder = "Schreibe deine Nachricht…";
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>("");
   const [threadId, setThreadId] = useState<string>("");
-  const [error, setError] = useState<unknown | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<AssistantStatus>("awaiting_message");
 
-  // Auto-Scroll ans Ende
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (status !== "awaiting_message") return;
-    if (!message.trim()) return;
+    if (status !== "awaiting_message" || !message.trim()) return;
 
     setStatus("in_progress");
+    setError(null);
 
-    // Nutzer-Nachricht sofort anzeigen
-    setMessages((msgs: Message[]) => [
+    const userMessage = message.trim();
+    const tempId = `user-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    setMessages((msgs) => [
       ...msgs,
-      { id: "", role: "user", content: message.trim() }
+      { id: tempId, role: "user", content: userMessage },
     ]);
-
-    const formData = new FormData();
-    formData.append("message", message.trim());
-    formData.append("threadId", threadId);
-
-    // Eingabefeld leeren
     setMessage("");
 
-    const result = await fetch("/api/assistant", {
-      method: "POST",
-      body: formData
-    });
-
-    if (result.body == null) {
-      setStatus("awaiting_message");
-      throw new Error("The response body is empty.");
-    }
-
     try {
-      for await (const { type, value } of readDataStream(
-        result.body.getReader()
-      )) {
+      const formData = new FormData();
+      formData.append("message", userMessage);
+      formData.append("threadId", threadId);
+
+      const result = await fetch("/api/assistant", { method: "POST", body: formData });
+      if (!result.body) throw new Error("The response body is empty.");
+
+      for await (const { type, value } of readDataStream(result. body. getReader())) {
         switch (type) {
-          case "assistant_message": {
-            setMessages((msgs: Message[]) => [
+          case "assistant_message":
+            setMessages((msgs) => [
               ...msgs,
-              {
-                id: value.id,
-                role: value.role,
-                content: value.content[0].text.value
-              }
+              { id: value.id, role: value.role, content: value.content[0]. text. value },
             ]);
             break;
-          }
-          case "assistant_control_data": {
+          case "assistant_control_data":
             setThreadId(value.threadId);
-            // letzte User-Nachricht per Kopie mit ID versehen
-            setMessages((msgs: Message[]) => {
-              if (msgs.length === 0) return msgs;
-              const updated = [...msgs];
-              const lastIdx = updated.length - 1;
-              updated[lastIdx] = { ...updated[lastIdx], id: value.messageId };
-              return updated;
-            });
+            setMessages((msgs) =>
+              msgs.map((m) => (m.id === tempId ? { ...m, id: value.messageId } : m))
+            );
             break;
-          }
-          case "error": {
-            setError(value);
-            break;
-          }
+          case "error":
+            setError(value && typeof value === 'object' && 'message' in value 
+              ? String((value as Error).message) 
+              : String(value));
+              break;
         }
       }
-    } catch (error) {
-      setError(error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message :  "Ein unbekannter Fehler ist aufgetreten");
+    } finally {
+      setStatus("awaiting_message");
     }
-
-    setStatus("awaiting_message");
-  };
-
-  const handleMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
   };
 
   const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (status === "awaiting_message" && message.trim()) {
-        // submit auslösen
-        const form = (e.currentTarget as HTMLTextAreaElement).closest("form");
-        form?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-      }
+      handleFormSubmit(e as unknown as FormEvent);
     }
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950">
-      <div className="flex flex-col w-full max-w-3xl mx-auto px-6 md:px-12 pt-8 pb-32">
-        {/* Header mit Avatar */}
-        <header className="flex items-center gap-4 mb-6">
+    <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
+      <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-32 px-4">
+        <header className="flex items-center gap-4 mb-10">
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900"
+            className="w-16 h-16 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
           />
           <div>
-            <h1 className="text-3xl md:text-4xl text-zinc-100 font-extrabold leading-tight">
-              {ASSISTANT_NAME}
-            </h1>
-            <p className="text-sm text-zinc-400">Dein Assurance & Resilience Mapping Assistant</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
+            <p className="text-xs text-zinc-400 uppercase tracking-widest">Assistant System</p>
           </div>
         </header>
 
-        {error != null && (
-          <div className="relative bg-red-500 text-white px-6 py-4 rounded-md mb-4">
-            <span className="block sm:inline">Error: {(error as any).toString()}</span>
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">
+            {error}
           </div>
         )}
 
-        {/* Nachrichtenbereich */}
-        <div className="flex flex-col w-full gap-3">
-          {messages.map((m: Message, idx) => {
-            const isUser = m.role === "user";
+        <div className="flex flex-col w-full gap-8">
+          {messages.map((m, idx) => {
+            const isUser = m. role === "user";
             return (
-              <div
-                key={(m.id || "msg") + "-" + idx}
-                className={`w-full flex ${isUser ? "justify-end" :  "justify-start"}`}
-              >
-                {! isUser ?  (
-                  // Bots Nachricht - grid layout für volle Breite
-                  <div className="w-full">
-                    <div className="grid grid-cols-[2.5rem_1fr] gap-3 w-full">
-                    {/* Avatar separat*/}
-                    <div className="flex justify-center">
-                    <img
-                      src="/armap-avatar.png"
-                      alt="ARMAP Avatar"
-                      className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
-                    />
-                    </div>
-
-                    {/* Nachrichtblase */}
-                    <div className="w-full">
-                      <div className="rounded-2xl px-4 py-3 shadow border bg-neutral-900 text-zinc-100 border-neutral-800">
-                        <ReactMarkdown className="whitespace-pre-wrap leading-relaxed">
-                          {m.content}
-                        </ReactMarkdown>
+              <div key={m.id + idx} className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+                {!isUser ?  (
+                  /* BOT */
+                  <div className="flex flex-col items-start gap-2 max-w-[90%] md:max-w-full w-full">
+                    {/* Avatar nur anzeigen, wenn es sich um die erste Nachricht des Bots oder nach der ersten Nachricht des Nutzers handelt. */}
+                    {(idx === 0 || messages[idx - 1]?.role === "user") && (
+                      <div className="flex items-center gap-2 ml-1">
+                        <img src="/armap-avatar.png" className="w-6 h-6 rounded-full border border-neutral-700" alt="bot" />
+                        <span className="text-xs text-zinc-500 font-bold tracking-wider uppercase">ARMAP AI</span>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                ) : (
-                  // Users Nachricht, begrenzt für 85%
-                  <div className="flex items-start gap-3 max-w-[85%]">
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
-                      Du
-                    </div>
-                    <div className="rounded-2xl px-4 py-3 shadow border bg-blue-600 text-white border-blue-500">
-                      <ReactMarkdown className="whitespace-pre-wrap">
+                    )}
+                    <div className="w-full rounded-2xl px-5 py-4 bg-neutral-900/50 border border-neutral-800 shadow-sm backdrop-blur-sm">
+                      <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap leading-relaxed text-[15px]">
                         {m.content}
                       </ReactMarkdown>
+                    </div>
+                  </div>
+                ) : (
+                  /* BENUTZER: Avatar links neben dem Text */
+                  <div className="flex items-start gap-3 max-w-[85%]">
+                    <div className="w-8 h-8 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-500/20 mt-1">
+                      DU
+                    </div>
+                    <div className="rounded-2xl px-5 py-3 bg-blue-600 text-white shadow-xl shadow-blue-900/10">
+                      <p className="whitespace-pre-wrap text-[15px] leading-snug">
+                        {m.content}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -219,59 +158,50 @@ const Chat = () => {
           })}
 
           {status === "in_progress" && (
-            <div className="w-full flex justify-start mt-1">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/armap-avatar.png"
-                  alt="ARMAP Avatar"
-                  className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
-                />
-                <span className="text-zinc-300 flex items-center gap-2">
-                  <Icons.spinner className="animate-spin w-4 h-4" />
-                  ARMAP tippt <DotAnimation />
-                </span>
-              </div>
+            <div className="flex items-center gap-3 text-zinc-500 ml-1">
+              <Icons.spinner className="animate-spin w-4 h-4" />
+              <span className="text-xs font-medium tracking-wide italic">
+                ARMAP generiert Antwort<DotAnimation />
+              </span>
             </div>
           )}
 
-          {/* Spacer für das fixierte Eingabefeld */}
-          <div ref={bottomRef} className="h-40" />
+          <div ref={bottomRef} className="h-4" />
         </div>
       </div>
 
-      {/* Eingabebereich – breiter und höher, fixiert */}
-      <form
-        onSubmit={handleFormSubmit}
-        className="flex flex-col gap-2 p-3 text-white bg-black/70 backdrop-blur-sm fixed left-1/2 -translate-x-1/2 bottom-6 w-[92%] max-w-3xl border border-neutral-800 rounded-2xl shadow-xl"
-      >
-        <textarea
-          disabled={status !== "awaiting_message"}
-          value={message}
-          onChange={handleMessageChange}
-          onKeyDown={handleTextareaKeyDown}
-          placeholder={placeholder}
-          rows={5}
-          className={`w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-4 outline-none
-            ${status !== "awaiting_message" ? "opacity-70" : "opacity-100"}
-            focus:ring-2 focus:ring-blue-600 border border-neutral-800`}
-        />
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-zinc-500">
-            Enter senden • Shift+Enter Zeilenumbruch
-          </div>
-          <Button
-            className="flex items-center gap-2 px-4 py-2"
-            variant="ghost"
-            type="submit"
+      {/* FESTES EINGANGSFELD */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent pb-6 pt-12 px-4">
+        <form
+          onSubmit={handleFormSubmit}
+          className="mx-auto max-w-3xl flex flex-col gap-2 p-3 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl"
+        >
+          <textarea
             disabled={status !== "awaiting_message"}
-            aria-label="Nachricht senden"
-            title="Nachricht senden"
-          >
-            Senden
-            <Icons.arrowRight className="text-gray-200 hover:text-white transition-colors duration-200 ease-in-out w-5 h-5" />
-          </Button>
-        </div>
-      </form>
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleTextareaKeyDown}
+            placeholder={placeholder}
+            rows={3}
+            className="w-full bg-transparent text-white placeholder: text-zinc-600 p-2 outline-none resize-none text-[15px]"
+          />
+          <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
+            {/* FÜR ZEILENUMBRUCH */}
+            <div className="text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
+              <span className="text-zinc-400">SHIFT + ENTER</span> FÜR ZEILENUMBRUCH
+            </div>
+            <Button
+              className="h-9 px-5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+              type="submit"
+              variant="default"
+              disabled={status !== "awaiting_message" || !message.trim()}
+            >
+              <span className="text-xs font-bold mr-2">SENDEN</span>
+              <Icons.arrowRight className="w-3. 5 h-3.5" />
+            </Button>
+          </div>
+        </form>
+      </div>
     </main>
   );
 };
