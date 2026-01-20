@@ -200,9 +200,9 @@ const Chat = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 ) : (
-                  // Users Nachricht, begrenzt für 85%
+                  // Users Nachricht, begrenzt 85%
                   <div className="flex items-start gap-3 max-w-[85%]">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
                       Du
