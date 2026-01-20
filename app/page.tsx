@@ -100,7 +100,7 @@ const Chat = () => {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
-      <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-32 px-4">
+      <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-56 px-4">
         <header className="flex items-center gap-4 mb-10">
           <img
             src="/armap-avatar.png"
@@ -166,7 +166,7 @@ const Chat = () => {
             </div>
           )}
 
-          <div ref={bottomRef} className="h-4" />
+          <div ref={bottomRef} className="h-24" />
         </div>
       </div>
 
@@ -183,7 +183,7 @@ const Chat = () => {
             onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
             rows={3}
-            className="w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-4 outline-none p-2 outline-none resize-none text-[15px]"/>
+            className="w-full rounded-xl bg-neutral-900 text-white placeholder: text-zinc-400 p-4 outline-none resize-none text-[15px]"/>
             <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
             {/* FÜR ZEILENUMBRUCH */}
             <div className="text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
