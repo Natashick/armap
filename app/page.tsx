@@ -105,7 +105,7 @@ const Chat = () => {
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-16 h-16 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
           />
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
@@ -130,7 +130,7 @@ const Chat = () => {
                     {/* Avatar nur anzeigen, wenn es sich um die erste Nachricht des Bots oder nach der ersten Nachricht des Nutzers handelt. */}
                     {(idx === 0 || messages[idx - 1]?.role === "user") && (
                       <div className="flex items-center gap-2 ml-1">
-                        <img src="/armap-avatar.png" className="w-6 h-6 rounded-full border border-neutral-700" alt="bot" />
+                        <img src="/armap-avatar.png" className="w-10 h-10 rounded-full border border-neutral-700" alt="bot" />
                         <span className="text-xs text-zinc-500 font-bold tracking-wider uppercase">ARMAP AI</span>
                       </div>
                     )}
@@ -143,7 +143,7 @@ const Chat = () => {
                 ) : (
                   /* BENUTZER: Avatar links neben dem Text */
                   <div className="flex items-start gap-3 max-w-[85%]">
-                    <div className="w-8 h-8 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-500/20 mt-1">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-500/20 mt-1">
                       DU
                     </div>
                     <div className="rounded-2xl px-5 py-3 bg-blue-600 text-white shadow-xl shadow-blue-900/10">
@@ -161,7 +161,7 @@ const Chat = () => {
             <div className="flex items-center gap-3 text-zinc-500 ml-1">
               <Icons.spinner className="animate-spin w-4 h-4" />
               <span className="text-xs font-medium tracking-wide italic">
-                ARMAP generiert Antwort<DotAnimation />
+                ARMAP tippt<DotAnimation />
               </span>
             </div>
           )}
@@ -183,7 +183,7 @@ const Chat = () => {
             onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
             rows={3}
-            className="w-full bg-transparent text-white placeholder: text-zinc-600 p-2 outline-none resize-none text-[15px]"
+            className="w-full bg-transparent text-white placeholder:text-zinc-500 p-2 outline-none resize-none text-[15px] focus:placeholder: text-zinc-600"
           />
           <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
             {/* FÜR ZEILENUMBRUCH */}
