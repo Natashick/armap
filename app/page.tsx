@@ -109,7 +109,7 @@ const Chat = () => {
           />
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
-            <p className="text-sm text-zinc-400 uppercase tracking-widest">Assurance & Resilience Mapping</p>
+            <p className="text-xl text-zinc-200 uppercase tracking-widest">Assurance & Resilience Mapping</p>
           </div>
         </header>
 
