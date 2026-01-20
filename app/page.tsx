@@ -179,10 +179,11 @@ const Chat = () => {
               >
                 {! isUser ?  (
                   // Bots Nachricht - grid layout für volle Breite
-                  <div className="w-full">
-                    <div className="grid grid-cols-[2.5rem_1fr] gap-3 w-full">
+                  <div className="w-full -ml-6 md:-ml-12 pr-6 md:pr-12">
+                    <div className="grid grid-cols-[calc(2.5rem+1.5rem)_1fr] gap-3 w-full">
+
                     {/* Avatar separat*/}
-                    <div className="flex justify-center">
+                    <div className="flex justify-end pl-6 md:pl-12">
                     <img
                       src="/armap-avatar.png"
                       alt="ARMAP Avatar"
