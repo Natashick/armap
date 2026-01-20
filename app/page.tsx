@@ -183,7 +183,7 @@ const Chat = () => {
             onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
             rows={3}
-            className="w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-4 outline-none focus:ring-2 focus:ring-blue-600 border border-neutral-800"/>
+            className="w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-4 outline-none p-2 outline-none resize-none text-[15px]"/>
             <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
             {/* FÜR ZEILENUMBRUCH */}
             <div className="text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
