@@ -178,22 +178,29 @@ const Chat = () => {
                 className={`w-full flex ${isUser ? "justify-end" :  "justify-start"}`}
               >
                 {! isUser ?  (
-                  // Bots Nachricht für volle Breite
-                  <div className="flex items-start gap-3 w-full">
-                    {/* Avatar */}
+                  // Bots Nachricht - grid layout für volle Breite
+                  <div className="w-full">
+                    <div className="grid grid-cols-[2.5rem_1fr] gap-3 w-full">
+                    {/* Avatar separat*/}
+                    <div className="flex justify-center">
                     <img
                       src="/armap-avatar.png"
                       alt="ARMAP Avatar"
-                      className="w-10 h-10 shrink-0 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                      className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
                     />
-                    <div className="flex-1 min-w-0">
+                    </div>
+
+                    {/* Nachrichtblase */}
+                    <div className="w-full">
                       <div className="rounded-2xl px-4 py-3 shadow border bg-neutral-900 text-zinc-100 border-neutral-800">
-                        <ReactMarkdown className="whitespace-pre-wrap">
+                        <ReactMarkdown className="whitespace-pre-wrap leading-relaxed">
                           {m.content}
                         </ReactMarkdown>
                       </div>
                     </div>
                   </div>
+                </div>
+                
                 ) : (
                   // Users Nachricht, begrenzt für 85%
                   <div className="flex items-start gap-3 max-w-[85%]">
