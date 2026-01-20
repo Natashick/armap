@@ -178,14 +178,15 @@ const Chat = () => {
                 className={`w-full flex ${isUser ? "justify-end" :  "justify-start"}`}
               >
                 {! isUser ?  (
-                  // Сообщение от бота - на всю ширину
+                  // Bots Nachricht für volle Breite
                   <div className="flex items-start gap-3 w-full">
+                    {/* Avatar */}
                     <img
                       src="/armap-avatar.png"
                       alt="ARMAP Avatar"
-                      className="w-10 h-10 rounded-full border border-neutral-800 object-cover bg-neutral-900"
+                      className="w-10 h-10 shrink-0 rounded-full border border-neutral-800 object-cover bg-neutral-900"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="rounded-2xl px-4 py-3 shadow border bg-neutral-900 text-zinc-100 border-neutral-800">
                         <ReactMarkdown className="whitespace-pre-wrap">
                           {m.content}
@@ -194,9 +195,9 @@ const Chat = () => {
                     </div>
                   </div>
                 ) : (
-                  // Сообщение от пользователя - ограничено 85%
+                  // Users Nachricht, begrenzt für 85%
                   <div className="flex items-start gap-3 max-w-[85%]">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-blue-600 text-white grid place-items-center text-xs font-semibold select-none">
                       Du
                     </div>
                     <div className="rounded-2xl px-4 py-3 shadow border bg-blue-600 text-white border-blue-500">
