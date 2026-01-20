@@ -8,7 +8,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 
-const ASSISTANT_NAME = "ARMAP - Assurance & Resilience Mapping";
+const ASSISTANT_NAME = "ARMAP";
 
 const DotAnimation = () => (
   <span className="inline-flex gap-x-1 ml-1">
@@ -109,7 +109,7 @@ const Chat = () => {
           />
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
-            <p className="text-xs text-zinc-400 uppercase tracking-widest">Assistant System</p>
+            <p className="text-sm text-zinc-400 uppercase tracking-widest">Assurance & Resilience Mapping</p>
           </div>
         </header>
 
@@ -131,7 +131,7 @@ const Chat = () => {
                     {(idx === 0 || messages[idx - 1]?.role === "user") && (
                       <div className="flex items-center gap-2 ml-1">
                         <img src="/armap-avatar.png" className="w-10 h-10 rounded-full border border-neutral-700" alt="bot" />
-                        <span className="text-xs text-zinc-500 font-bold tracking-wider uppercase">ARMAP AI</span>
+                        <span className="text-xs text-zinc-500 font-bold tracking-wider uppercase">ARMAP</span>
                       </div>
                     )}
                     <div className="w-full rounded-2xl px-5 py-4 bg-neutral-900/50 border border-neutral-800 shadow-sm backdrop-blur-sm">
@@ -158,9 +158,9 @@ const Chat = () => {
           })}
 
           {status === "in_progress" && (
-            <div className="flex items-center gap-3 text-zinc-500 ml-1">
+            <div className="flex items-center gap-3 text-zinc-400 ml-1">
               <Icons.spinner className="animate-spin w-4 h-4" />
-              <span className="text-xs font-medium tracking-wide italic">
+              <span className="text-sm font-medium tracking-wide italic">
                 ARMAP tippt<DotAnimation />
               </span>
             </div>
