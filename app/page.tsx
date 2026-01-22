@@ -102,11 +102,11 @@ const Chat = () => {
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
       <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-56 px-4">
-        <header className="flex items-center gap-4 mb-10">
+        <header className="sticky top-0 z-50 w-full flex items-center gap-4 py-4 mb-10 bg-black/80 backdrop-blur-md border-b border-white/5 -mx-4 px-4">
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
+            className="w-12 h-12 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
           />
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
@@ -185,8 +185,8 @@ const Chat = () => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
-            rows={3}
-            className="w-full rounded-xl bg-neutral-900 text-white placeholder: text-zinc-400 p-4 outline-none resize-none text-[15px]"/>
+            rows={2}
+            className="w-full rounded-xl bg-neutral-900 text-white placeholder: text-zinc-400 p-3 outline-none resize-none text-[15px]"/>
             <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
             {/* FÜR ZEILENUMBRUCH */}
             <div className="text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
