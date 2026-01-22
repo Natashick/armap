@@ -27,7 +27,7 @@ const DotAnimation = () => (
 );
 
 const Chat = () => {
-  const placeholder = "Schreibe deine Nachricht…";
+  const placeholder = "Type a message…";
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>("");
   const [threadId, setThreadId] = useState<string>("");
@@ -64,7 +64,7 @@ const Chat = () => {
       const result = await fetch("/api/assistant", { method: "POST", body: formData });
       if (!result.body) throw new Error("The response body is empty.");
 
-      for await (const { type, value } of readDataStream(result. body. getReader())) {
+      for await (const { type, value } of readDataStream(result.body.getReader())) {
         switch (type) {
           case "assistant_message":
             setMessages((msgs) => [
@@ -101,19 +101,21 @@ const Chat = () => {
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
-      <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-56 px-4">
-        <header className="sticky top-0 z-50 w-full flex items-center gap-4 py-4 mb-10 bg-black/80 backdrop-blur-md border-b border-white/5 -mx-4 px-4">
+      <header className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/5">
+          <div className="max-w-3xl mx-auto flex items-center gap-6 py-6 px-4">
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-12 h-12 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl shrink-0"
           />
-          <div>
+          <div className="flex flex-col justify-center">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
             <p className="text-xl text-zinc-200 uppercase tracking-widest">Assurance & Resilience Mapping</p>
           </div>
+          </div>
         </header>
 
+      <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-56 px-4">
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">
             {error}
@@ -147,7 +149,7 @@ const Chat = () => {
                   /* BENUTZER: Avatar links neben dem Text */
                   <div className="flex items-start gap-3 max-w-[85%]">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-500/20 mt-1">
-                      DU
+                      You
                     </div>
                     <div className="rounded-2xl px-5 py-3 bg-blue-600 text-white shadow-xl shadow-blue-900/10">
                       <p className="whitespace-pre-wrap text-[15px] leading-snug">
@@ -164,7 +166,7 @@ const Chat = () => {
             <div className="flex items-center gap-3 text-zinc-400 ml-1">
               <Icons.spinner className="animate-spin w-4 h-4" />
               <span className="text-sm font-medium tracking-wide italic">
-                ARMAP tippt<DotAnimation />
+                ARMAP typing<DotAnimation />
               </span>
             </div>
           )}
@@ -185,12 +187,12 @@ const Chat = () => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleTextareaKeyDown}
             placeholder={placeholder}
-            rows={2}
-            className="w-full rounded-xl bg-neutral-900 text-white placeholder: text-zinc-400 p-3 outline-none resize-none text-[15px]"/>
+            rows={1}
+            className="w-full rounded-xl bg-neutral-900 text-white placeholder:text-zinc-400 p-3 outline-none resize-none text-[15px] min-h-[48px]"/>
             <div className="flex items-center justify-between border-t border-neutral-800/50 pt-2 px-1">
             {/* FÜR ZEILENUMBRUCH */}
             <div className="text-[10px] uppercase tracking-tighter text-zinc-500 font-bold">
-              <span className="text-zinc-400">SHIFT + ENTER</span> FÜR ZEILENUMBRUCH
+              <span className="text-zinc-400">Enter to send, Shift+Enter for new line</span>
             </div>
             <Button
               className="h-9 px-5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-95"
@@ -198,8 +200,8 @@ const Chat = () => {
               variant="default"
               disabled={status !== "awaiting_message" || !message.trim()}
             >
-              <span className="text-xs font-bold mr-2">SENDEN</span>
-              <Icons.arrowRight className="w-3. 5 h-3.5" />
+              <span className="text-xs font-bold mr-2">SEND</span>
+              <Icons.arrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>
         </form>
