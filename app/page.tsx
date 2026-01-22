@@ -111,7 +111,7 @@ const Chat = () => {
           />
           <div className="flex flex-col justify-center">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
-            <p className="text-xl text-zinc-200 uppercase tracking-[0.3em] mt-3 font-medium">Assurance & Resilience Mapping</p>
+            <p className="text-sm md:text-base text-zinc-200 uppercase tracking-[0.3em] mt-1 font-medium">Assurance & Resilience Mapping</p>
           </div>
         </div>
         </div>
