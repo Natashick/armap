@@ -7,6 +7,7 @@ import { AssistantStatus, Message } from "ai/react";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
+import remarkGfm from "remark-gfm";
 
 const ASSISTANT_NAME = "ARMAP";
 
@@ -135,7 +136,9 @@ const Chat = () => {
                       </div>
                     )}
                     <div className="w-full rounded-2xl px-5 py-4 bg-neutral-900/50 border border-neutral-800 shadow-sm backdrop-blur-sm">
-                      <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap leading-relaxed text-[15px]">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        className="prose prose-invert max-w-none whitespace-pre-wrap leading-relaxed text-[15px]">
                         {m.content}
                       </ReactMarkdown>
                     </div>

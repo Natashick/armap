@@ -7,7 +7,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
 	title: "ARMAP - Assurance & Resilience Mapping Assistant",
-	description: "Dein intelligenter Assurance & Resilience Mapping Assistant powered by AI",
+	description: "Dein intelligenter Assurance & Resilience Mapping Assistant",
+	authors: [{ name: "Natashick", url: "https://github.com/Natashick" }],
 	openGraph: {
 		title: "ARMAP Assistant",
 		description: "Dein Assurance & Resilience Mapping Assistant",
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
 	children
 }: {
-	children: React. ReactNode;
+	children: React.ReactNode;
 }) {
 	return (
 		<html lang="en">

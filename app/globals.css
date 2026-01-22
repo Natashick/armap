@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .prose table {
+        @apply w-full border-collapse my-4 text-sm bg-neutral-900/50 rounded-lg overflow-hidden border border-neutral-800;
+    }
+
+    .prose th {
+        @apply bg-neutral-800/80 p-3 text-left border-b-2 border-neutral-700 text-zinc-100 font-bold;
+    }
+
+    .prose td {
+        @apply p-3 border-b border-neutral-800/50 text-zinc-300;
+    }
+
+    .prose tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .prose tr:hover {
+        @apply bg-neutral-800/30;
+    }
+}
