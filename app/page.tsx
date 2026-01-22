@@ -69,7 +69,7 @@ const Chat = () => {
           case "assistant_message":
             setMessages((msgs) => [
               ...msgs,
-              { id: value.id, role: value.role, content: value.content[0]. text. value },
+              { id: value.id, role: value.role, content: value.content[0].text.value },
             ]);
             break;
           case "assistant_control_data":
@@ -102,15 +102,15 @@ const Chat = () => {
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
       <header className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-3xl mx-auto flex items-center gap-6 py-6 px-4">
+          <div className="max-w-3xl mx-auto flex flex-col items-center py-8 px-4 text-center">
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl shrink-0"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl mb-4"
           />
           <div className="flex flex-col justify-center">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
-            <p className="text-xl text-zinc-200 uppercase tracking-widest">Assurance & Resilience Mapping</p>
+            <p className="text-xl text-zinc-200 uppercase tracking-[0.3em] mt-3 font-medium">Assurance & Resilience Mapping</p>
           </div>
           </div>
         </header>
@@ -124,7 +124,7 @@ const Chat = () => {
 
         <div className="flex flex-col w-full gap-8">
           {messages.map((m, idx) => {
-            const isUser = m. role === "user";
+            const isUser = m.role === "user";
             return (
               <div key={m.id + idx} className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
                 {!isUser ?  (
