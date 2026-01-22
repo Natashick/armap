@@ -102,18 +102,20 @@ const Chat = () => {
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-black to-neutral-950 text-zinc-100">
       <header className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-3xl mx-auto flex flex-col items-center py-8 px-4 text-center">
+          <div className="max-w-3xl mx-auto flex items-center justify-center py-6 px-4">
+            <div className="flex items-center gap-6">
           <img
             src="/armap-avatar.png"
             alt="ARMAP Avatar"
-            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl mb-4"
+            className="w-20 h-20 rounded-xl border border-neutral-800 object-cover bg-neutral-900 shadow-2xl shrink-0"
           />
           <div className="flex flex-col justify-center">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{ASSISTANT_NAME}</h1>
             <p className="text-xl text-zinc-200 uppercase tracking-[0.3em] mt-3 font-medium">Assurance & Resilience Mapping</p>
           </div>
-          </div>
-        </header>
+        </div>
+        </div>
+      </header>
 
       <div className="flex flex-col w-full max-w-3xl mx-auto pt-8 pb-56 px-4">
         {error && (
